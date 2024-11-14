@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>运行 Python 脚本并显示二维码</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        #qrcode {
+            display: none;
+            margin-top: 20px;
+        }
+        #error-message {
+            color: red;
+            font-size: 18px;
+            display: none;
+        }
+        #video-stream-container {
+            display: none;
+            margin-top: 20px;
+        }
+        #video-stream {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border: 1px solid #ccc;
+        }
+        #verified-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #condition-output {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        #python-output {
+            margin-top: 20px;
+            font-size: 16px;
+            white-space: pre-wrap; /* Ensure proper formatting for newlines */
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>运行 Python 脚本并显示二维码</h1>
+    
+    <!-- 运行 Python 脚本的按钮 -->
+    <button id="run-btn">运行 Python 脚本</button>
+    
+    <!-- 显示二维码图片 -->
+    <div id="qrcode">
+        <img src="{{ url_for('send_image', filename='qrcode.png') }}" alt="二维码">
+    </div>
+
+    <!-- 显示"验证成功"按钮 -->
+    <button id="verified-btn">Verified</button>
+
+    <!-- 显示错误信息 -->
+    <div id="error-message"></div>
+
+    <!-- 显示视频流 -->
+    <div id="video-stream-container">
+        <h2>视频流：</h2>
+        <img id="video-stream" src="http://127.0.0.1:5000/video_feed" alt="Video Feed">
+    </div>
+
+    <!-- 显示 Python 脚本输出 -->
+    <div id="python-output"></div>
+
+    <!-- Display condition output -->
+    <div id="condition-output"></div>
+
+    <script>
+        // This variable will store the timeout reference to clear the old error message
+        let errorTimeout;
+
+        document.getElementById('run-btn').addEventListener('click', function() {
+            // 发送请求运行第一个 Python 脚本
+            fetch('/run-python', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 显示二维码并显示"Verified"按钮
+                        document.getElementById('qrcode').style.display = 'block';
+                        document.getElementById('verified-btn').style.display = 'block';
+                        // 显示 Python 脚本的输出
+                        displayPythonOutput(data.output);
+                    } else {
+                        alert('运行脚本失败: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('发生错误:', error);
+                    alert('发生了一个错误。');
+                });
+        });
+
+        // 监听 "Verified" 按钮点击事件
+        document.getElementById('verified-btn').addEventListener('click', function() {
+            // 清除之前的错误信息（如果有）
+            document.getElementById('error-message').style.display = 'none';
+
+            // 发送请求运行 test-indexdecrypt-cam1016 脚本
+            fetch('/run-cam1016', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 如果验证成功，显示视频流
+                        document.getElementById('video-stream-container').style.display = 'block';
+                        document.getElementById('condition-output').innerText = 'Condition: ' + data.condition;
+                        // 显示 Python 脚本的输出
+                        displayPythonOutput(data.output);
+                    } else {
+                        // 如果验证失败，显示错误信息并设置超时清除
+                        showErrorAndClearTimeout();
+                        document.getElementById('condition-output').innerText = 'Condition: ' + data.condition;
+                        // 显示 Python 脚本的输出
+                        displayPythonOutput(data.output);
+                    }
+                })
+                .catch(error => {
+                    console.error('发生错误:', error);
+                    alert('发生了一个错误。');
+                });
+        });
+
+        // 显示 Python 脚本的输出
+        function displayPythonOutput(output) {
+            const outputContainer = document.getElementById('python-output');
+            outputContainer.style.display = 'block';
+            outputContainer.innerText = output;
+        }
+
+        // 显示错误信息并在 3 秒后清除
+        function showErrorAndClearTimeout() {
+            // 显示错误信息
+            document.getElementById('error-message').innerText = '验证失败，请重新验证。';
+            document.getElementById('error-message').style.display = 'block';
+
+            // 清除任何现有的超时，并设置新的超时，3秒后隐藏错误信息
+            clearTimeout(errorTimeout);
+            errorTimeout = setTimeout(() => {
+                document.getElementById('error-message').style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
