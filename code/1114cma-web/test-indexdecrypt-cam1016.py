@@ -17,7 +17,7 @@ import cv2
 
 '''---------------------------------------------------------------------------------------'''
 
-
+'''
 import threading
 import logging
 import multiprocessing
@@ -56,16 +56,16 @@ def video_feed():
 def activate_camera():
     global is_camera_active
     is_camera_active = True
-    process = multiprocessing.Process(target=lambda: app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False))
+    process = multiprocessing.Process(target=lambda: app.run(host='0.0.0.0', port=5001, debug=False, use_reloader=False))
     process.start()
 
 # 验证成功后调用此函数
 def on_auth_success():
     print("验证成功，启用摄像头")
     IP1 = get_ip_address()
-    print(f'Please connect to: http://{IP1}:5000/video_feed')
+    print(f'Please connect to: http://{IP1}:5001/video_feed')
     activate_camera()
-
+'''
 '''---------------------------------------------------------------------------------------'''
 
 
@@ -168,8 +168,8 @@ def main():
     result = execute_and_check()
 
     if result.get("result") == True:
-        print('{"result": true},"驗證成功"')
-        on_auth_success()
+        print("驗證成功")
+        #on_auth_success()
         return True
     else:
         print("請重新驗證")
