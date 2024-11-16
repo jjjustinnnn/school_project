@@ -1,1 +1,2 @@
-
+PC上跑: AES.py、AESdecrypt.py，直接給定macaddress(金鑰)。
+rpi上跑: AES.py、AESdecrypt.py，都會用到getmacaddress.py(自動抓取)。
