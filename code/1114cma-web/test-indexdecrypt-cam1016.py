@@ -170,6 +170,7 @@ def main():
     if result.get("result") == True:
         print("驗證成功")
         #on_auth_success()
+        subprocess.run(["python","1115.py"])
         return True
     else:
         print("請重新驗證")

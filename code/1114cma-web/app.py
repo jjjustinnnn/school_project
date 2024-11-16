@@ -4,6 +4,7 @@ from flask import Flask, render_template, send_from_directory, redirect, jsonify
 import subprocess
 import threading
 import json
+import webbrowser
 
 # Define the directory paths
 STATIC_DIR = '/home/abc/Desktop/web2.0/static'
@@ -152,6 +153,12 @@ def run_cam1016_script():
 def index():
     return render_template('index.html')
 
+
+def open_browser():
+    time.sleep(2)  # 等待 Flask 服务器启动
+    webbrowser.open_new('http://127.0.0.1:5000')
 # Start the Flask app
 if __name__ == '__main__':
-    app.run(debug=True)
+    threading.Thread(target=open_browser).start()  # 在另一个线程中打开浏览器
+    app.run(debug=False, use_reloader=False) 
+ 
